@@ -57,13 +57,15 @@ def amenities_del(amenity_id):
                  methods=['POST'],
                  strict_slashes=False)
 def amenities_new():
-    try:
-        obj_JSON = request.get_json()
-        new_obj = Amenity(**obj_JSON)
-        if not obj_JSON.get('name'):
-            abort(400, description="Missing user_id")
-    except BadRequest:
-        abort(400, description="Not a JSON")
+    """ creates new amenity """
+    obj_JSON = request.get_json()
+    if obj_JSON is None:
+        abort(400, "Not a JSON")
+    elif 'name' not in obj_JSON.keys():
+        abort(400, description="Missing name")
+
+    obj_JSON = request.get_json()
+    new_obj = Amenity(**obj_JSON)
 
     storage.new(new_obj)
     storage.save()
