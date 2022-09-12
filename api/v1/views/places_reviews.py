@@ -1,6 +1,7 @@
 #!/usr/bin/python3
 """ API redirections """
 from models.review import Review
+from models.place import Place
 from werkzeug.exceptions import BadRequest
 from api.v1.views import app_views
 from flask import jsonify, abort, request
@@ -37,6 +38,21 @@ def reviews_get(review_id):
         abort(404)
 
 
+# Get cities by state_id
+@app_views.route('/places/<place_id>/reviews',
+                 methods=['GET'],
+                 strict_slashes=False)
+def reviews_by_place(place_id):
+    """ retrieves all reviews object based on partent place_id """
+    ret_list = []
+    if storage.get(Place, place_id) is None:
+        abort(404)
+    for obj in storage.all(Review).values():
+        if obj.place_id == place_id:
+            ret_list.append(obj.to_dict())
+    return jsonify(ret_list)
+
+
 # Delete by id
 @app_views.route('/reviews/<review_id>',
                  methods=['DELETE'],
@@ -53,10 +69,12 @@ def reviews_del(review_id):
 
 
 # Create new
-@app_views.route('/reviews/',
+@app_views.route('places/<place_id>/reviews/',
                  methods=['POST'],
                  strict_slashes=False)
-def reviews_new():
+def reviews_new(place_id):
+    if storage.get(Place, place_id) is None:
+        abort(404)
     try:
         obj_JSON = request.get_json()
         new_obj = Review(**obj_JSON)
@@ -74,7 +92,7 @@ def reviews_new():
 @app_views.route('/reviews/<review_id>', methods=['PUT'], strict_slashes=False)
 def reviews_put(review_id):
     """ Handles PUT request. Updates a Review obj with status 200, else 400 """
-    ignore_keys = ['id', 'created_at', 'updated_at']
+    ignore_keys = ['id', 'user_id', 'place_id', 'created_at', 'updated_at']
     obj = storage.get(Review, review_id)
     attrs = request.get_json(force=True, silent=True)
     if not obj:
