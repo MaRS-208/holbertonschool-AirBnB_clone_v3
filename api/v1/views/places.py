@@ -6,6 +6,7 @@ from api.v1.views import app_views
 from flask import jsonify, abort, request
 from models import storage
 from models.place import Place
+from models.city import City
 from werkzeug.exceptions import BadRequest
 
 
@@ -38,6 +39,19 @@ def places_get(place_id):
     else:
         abort(404)
 
+# Get places by city_id
+@app_views.route('/cities/<city_id>/places',
+                 methods=['GET'],
+                 strict_slashes=False)
+def places_by_city(state_id):
+    """ retrieves all cities object based on partent state_id """
+    ret_list = []
+    if storage.get(City, city_id) is None:
+        abort(404)
+    for obj in storage.all(Place).values():
+        if obj.city_id == city_id:
+            ret_list.append(obj.to_dict())
+    return jsonify(ret_list)
 
 # Delete by id
 @app_views.route('/places/<place_id>',
@@ -55,17 +69,22 @@ def places_del(place_id):
 
 
 # Create new
-@app_views.route('/places/',
+@app_views.route('/cities/<city_id>/places/',
                  methods=['POST'],
                  strict_slashes=False)
-def places_new():
-    try:
-        obj_JSON = request.get_json()
-        new_obj = Place(**obj_JSON)
-        if not obj_JSON.get('name'):
-            abort(400, description="Missing name")
-    except BadRequest:
-        abort(400, description="Not a JSON")
+def places_new(city_id):
+    if storage.get(City, city_id) is None:
+        abort(404)
+    obj_JSON = request.get_json()
+    if obj_JSON is None:
+        abort(400, "Not a JSON")
+    elif 'name' not in obj_JSON.keys():
+        abort(400, description="Missing name")
+    elif 'user_id' not in obj_JSON.keys():
+        abort(400, description="Missing user_id")
+
+    obj_JSON = request.get_json()
+    new_obj = Place(**obj_JSON)
 
     storage.new(new_obj)
     storage.save()
@@ -75,8 +94,8 @@ def places_new():
 # Update
 @app_views.route('/places/<place_id>', methods=['PUT'], strict_slashes=False)
 def places_put(place_id):
-    """ Handles PUT request. Updates a State obj with status 200, else 400 """
-    ignore_keys = ['id', 'created_at', 'updated_at']
+    """ Handles PUT request. Updates a Place obj with status 200, else 400 """
+    ignore_keys = ['id', 'created_at', 'updated_at', 'user_id', 'city_id']
     obj = storage.get(Place, place_id)
     attrs = request.get_json(force=True, silent=True)
     if not obj:
