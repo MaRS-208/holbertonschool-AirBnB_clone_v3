@@ -27,7 +27,7 @@ def users_all():
 
 
 # Get by id
-@app_views.route('/users/<city_id>',
+@app_views.route('/users/<user_id>',
                  methods=['GET'],
                  strict_slashes=False)
 def users_get(user_id):
@@ -40,7 +40,7 @@ def users_get(user_id):
 
 
 # Delete by id
-@app_views.route('/users/<city_id>',
+@app_views.route('/users/<user_id>',
                  methods=['DELETE'],
                  strict_slashes=False)
 def users_del(user_id):
@@ -59,13 +59,17 @@ def users_del(user_id):
                  methods=['POST'],
                  strict_slashes=False)
 def users_new():
-    try:
-        obj_JSON = request.get_json()
-        new_obj = User(**obj_JSON)
-        if not obj_JSON.get('name'):
-            abort(400, description="Missing name")
-    except BadRequest:
-        abort(400, description="Not a JSON")
+    """ create new User object """
+    obj_JSON = request.get_json()
+    if obj_JSON is None:
+        abort(400, "Not a JSON")
+    elif 'email' not in obj_JSON.keys():
+        abort(400, description="Missing email")
+    elif 'password' not in obj_JSON.keys():
+        abort(400, description="Missing password")
+
+    obj_JSON = request.get_json()
+    new_obj = User(**obj_JSON)
 
     storage.new(new_obj)
     storage.save()
@@ -73,10 +77,10 @@ def users_new():
 
 
 # Update
-@app_views.route('/users/<city_id>', methods=['PUT'], strict_slashes=False)
+@app_views.route('/users/<user_id>', methods=['PUT'], strict_slashes=False)
 def users_put(city_id):
     """ Handles PUT request. Updates a State obj with status 200, else 400 """
-    ignore_keys = ['id', 'created_at', 'updated_at']
+    ignore_keys = ['id', 'email',  'created_at', 'updated_at']
     obj = storage.get(User, user_id)
     attrs = request.get_json(force=True, silent=True)
     if not obj:
