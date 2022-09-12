@@ -78,13 +78,14 @@ def cities_del(city_id):
 def cities_new(state_id):
     if storage.get(State, state_id) is None:
         abort(404)
-    try:
-        obj_JSON = request.get_json()
-        new_obj = City(**obj_JSON)
-        if not obj_JSON.get('name'):
-            abort(400, description="Missing name")
-    except BadRequest:
-        abort(400, description="Not a JSON")
+    obj_JSON = request.get_json()
+    if obj_JSON is None:
+        abort(400, "Not a JSON")
+    elif 'name' not in obj_JSON.keys():
+        abort(400, description="Missing name")
+
+    new_obj = City(**obj_JSON)
+    new_obj.state_id = state_id
 
     storage.new(new_obj)
     storage.save()
