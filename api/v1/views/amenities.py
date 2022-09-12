@@ -1,6 +1,6 @@
 #!/usr/bin/python3
 """ API redirections """
-from models.state import State
+from models.amenity import Amenity
 from werkzeug.exceptions import BadRequest
 from api.v1.views import app_views
 from flask import jsonify, abort, request
@@ -8,29 +8,29 @@ from models import storage
 
 
 # Status
-@app_views.route('/states/status')
-def states_status():
+@app_views.route('/amenities/status')
+def amenities_status():
     """ returns status OK if app is working """
     return jsonify({"Status": "OK"})
 
 
 # All
-@app_views.route('/states', strict_slashes=False)
-def states_all():
-    """ retrieves a list of all states objects """
+@app_views.route('/amenities', strict_slashes=False)
+def amenities_all():
+    """ retrieves a list of all amenities objects """
     ret_list = []
-    for obj in storage.all(State).values():
+    for obj in storage.all(Amenity).values():
         ret_list.append(obj.to_dict())
     return jsonify(ret_list)
 
 
 # Get by id
-@app_views.route('/states/<state_id>',
+@app_views.route('/amenities/<amenity_id>',
                  methods=['GET'],
                  strict_slashes=False)
-def states_get(state_id):
-    """ retrieves a specific state object based on id """
-    obj = storage.get(State, state_id)
+def amenities_get(amenity_id):
+    """ retrieves a specific amenity object based on id """
+    obj = storage.get(Amenity, amenity_id)
     if (obj):
         return jsonify(obj.to_dict())
     else:
@@ -38,12 +38,12 @@ def states_get(state_id):
 
 
 # Delete by id
-@app_views.route('/states/<state_id>',
+@app_views.route('/amenities/<amenity_id>',
                  methods=['DELETE'],
                  strict_slashes=False)
-def states_del(state_id):
-    """ delete linked state object """
-    obj = storage.get(State, state_id)
+def amenities_del(amenity_id):
+    """ delete linked amenity object """
+    obj = storage.get(Amenity, amenity_id)
     if obj is not None:
         storage.delete(obj)
         storage.save()
@@ -53,13 +53,13 @@ def states_del(state_id):
 
 
 # Create new
-@app_views.route('/states/',
+@app_views.route('/amenities/',
                  methods=['POST'],
                  strict_slashes=False)
-def states_new():
+def amenities_new():
     try:
         obj_JSON = request.get_json()
-        new_obj = State(**obj_JSON)
+        new_obj = Amenity(**obj_JSON)
         if not obj_JSON.get('name'):
             abort(400, description="Missing name")
     except BadRequest:
@@ -71,11 +71,11 @@ def states_new():
 
 
 # Update
-@app_views.route('/states/<state_id>', methods=['PUT'], strict_slashes=False)
-def states_put(state_id):
-    """ Handles PUT request. Updates a State obj with status 200, else 400 """
+@app_views.route('/amenities/<amenity_id>', methods=['PUT'], strict_slashes=False)
+def amenities_put(amenity_id):
+    """ Handles PUT request. Updates an Amenity obj with status 200, else 400 """
     ignore_keys = ['id', 'created_at', 'updated_at']
-    obj = storage.get(State, state_id)
+    obj = storage.get(Amenity, amenity_id)
     attrs = request.get_json(force=True, silent=True)
     if not obj:
         abort(404)
