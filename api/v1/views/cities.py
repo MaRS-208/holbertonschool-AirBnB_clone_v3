@@ -49,7 +49,7 @@ def cities_by_state(state_id):
     """ retrieves all cities object based on partent state_id """
     ret_list = []
     if storage.get(State, state_id) is None:
-        abort (404)
+        abort(404)
     for obj in storage.all(City).values():
         if obj.state_id == state_id:
             ret_list.append(obj.to_dict())
