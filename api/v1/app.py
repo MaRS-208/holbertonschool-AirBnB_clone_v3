@@ -12,6 +12,7 @@ app = Flask(__name__)
 app.register_blueprint(app_views)
 app.config['JSONIFY_PRETTYPRINT_REGULAR'] = True
 
+
 @app.errorhandler(404)
 def err_not_fnd(self):
     """error: 404: page not found"""
@@ -28,4 +29,3 @@ if __name__ == "__main__":
     host = getenv("HBNB_API_HOST", "0.0.0.0")
     port = getenv("HBNB_API_PORT", "5000")
     app.run(host=host, port=port, threaded=True, debug=True)
-

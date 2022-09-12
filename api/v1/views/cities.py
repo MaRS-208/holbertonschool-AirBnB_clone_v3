@@ -6,7 +6,8 @@ objects that handles all default RESTFul API actions"""
 from api.v1.views import app_views
 from flask import jsonify, abort, request
 from models import storage
-from models.state import City
+from models.city import City
+from models.state import State
 from werkzeug.exceptions import BadRequest
 
 
@@ -40,6 +41,21 @@ def cities_get(city_id):
         abort(404)
 
 
+# Get cities by state_id
+@app_views.route('/states/<state_id>/cities',
+                 methods=['GET'],
+                 strict_slashes=False)
+def cities_by_state(state_id):
+    """ retrieves all cities object based on partent state_id """
+    ret_list = []
+    if storage.get(State, state_id) is None:
+        abort (404)
+    for obj in storage.all(City).values():
+        if obj.state_id == state_id:
+            ret_list.append(obj.to_dict())
+    return jsonify(ret_list)
+
+
 # Delete by id
 @app_views.route('/cities/<city_id>',
                  methods=['DELETE'],
@@ -56,10 +72,12 @@ def cities_del(city_id):
 
 
 # Create new
-@app_views.route('/cities/',
+@app_views.route('/states/<state_id>/cities/',
                  methods=['POST'],
                  strict_slashes=False)
-def cities_new():
+def cities_new(state_id):
+    if storage.get(State, state_id) is None:
+        abort(404)
     try:
         obj_JSON = request.get_json()
         new_obj = City(**obj_JSON)
@@ -70,14 +88,14 @@ def cities_new():
 
     storage.new(new_obj)
     storage.save()
-    return jsonify(storage.get(new_obj.__class__, new_obj.id).to_dict())
+    return jsonify(storage.get(new_obj.__class__, new_obj.id).to_dict()), 201
 
 
 # Update
 @app_views.route('/cities/<city_id>', methods=['PUT'], strict_slashes=False)
 def cities_put(city_id):
     """ Handles PUT request. Updates a State obj with status 200, else 400 """
-    ignore_keys = ['id', 'created_at', 'updated_at']
+    ignore_keys = ['id', 'created_at', 'updated_at', 'state_id']
     obj = storage.get(City, city_id)
     attrs = request.get_json(force=True, silent=True)
     if not obj:
