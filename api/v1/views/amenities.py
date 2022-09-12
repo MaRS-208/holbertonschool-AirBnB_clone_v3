@@ -71,9 +71,11 @@ def amenities_new():
 
 
 # Update
-@app_views.route('/amenities/<amenity_id>', methods=['PUT'], strict_slashes=False)
+@app_views.route('/amenities/<amenity_id>',
+                 methods=['PUT'],
+                 strict_slashes=False)
 def amenities_put(amenity_id):
-    """ Handles PUT request. Updates an Amenity obj with status 200, else 400 """
+    """ Handles PUT request. Updates Amenity obj with status 200, else 400 """
     ignore_keys = ['id', 'created_at', 'updated_at']
     obj = storage.get(Amenity, amenity_id)
     attrs = request.get_json(force=True, silent=True)
