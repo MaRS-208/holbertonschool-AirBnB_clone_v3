@@ -57,13 +57,15 @@ def amenities_del(amenity_id):
                  methods=['POST'],
                  strict_slashes=False)
 def amenities_new():
-    try:
-        obj_JSON = request.get_json()
-        new_obj = Amenity(**obj_JSON)
-        if not obj_JSON.get('name'):
-            abort(400, description="Missing user_id")
-    except BadRequest:
-        abort(400, description="Not a JSON")
+    """ creates new amenity """
+    obj_JSON = request.get_json()
+    if obj_JSON is None:
+        abort(400, "Not a JSON")
+    elif 'name' not in obj_JSON.keys():
+        abort(400, description="Missing name")
+
+    obj_JSON = request.get_json()
+    new_obj = Amenity(**obj_JSON)
 
     storage.new(new_obj)
     storage.save()
@@ -71,9 +73,11 @@ def amenities_new():
 
 
 # Update
-@app_views.route('/amenities/<amenity_id>', methods=['PUT'], strict_slashes=False)
+@app_views.route('/amenities/<amenity_id>',
+                 methods=['PUT'],
+                 strict_slashes=False)
 def amenities_put(amenity_id):
-    """ Handles PUT request. Updates an Amenity obj with status 200, else 400 """
+    """ Update an amenity """
     ignore_keys = ['id', 'created_at', 'updated_at']
     obj = storage.get(Amenity, amenity_id)
     attrs = request.get_json(force=True, silent=True)
