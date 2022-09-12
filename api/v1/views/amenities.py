@@ -61,7 +61,7 @@ def amenities_new():
         obj_JSON = request.get_json()
         new_obj = Amenity(**obj_JSON)
         if not obj_JSON.get('name'):
-            abort(400, description="Missing name")
+            abort(400, description="Missing user_id")
     except BadRequest:
         abort(400, description="Not a JSON")
 
