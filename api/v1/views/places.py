@@ -7,17 +7,18 @@ from flask import jsonify, abort, request
 from models import storage
 from models.place import Place
 from models.city import City
+from models.user import User
 from werkzeug.exceptions import BadRequest
 
 
-# Status
+# Status -- Not Used
 @app_views.route('/places/status')
 def places_status():
     """ returns status OK if app is working """
     return jsonify({"Status": "OK"})
 
 
-# All
+# All -- Not Used
 @app_views.route('/places', strict_slashes=False)
 def places_all():
     """ retrieves a list of all states objects """
@@ -82,6 +83,8 @@ def places_new(city_id):
         abort(400, description="Missing name")
     elif 'user_id' not in obj_JSON.keys():
         abort(400, description="Missing user_id")
+    elif storage.get(User, obj_JSON.user_id) is None:
+        abort(404)
 
     obj_JSON = request.get_json()
     new_obj = Place(**obj_JSON)
