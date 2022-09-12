@@ -78,7 +78,7 @@ def users_new():
 
 # Update
 @app_views.route('/users/<user_id>', methods=['PUT'], strict_slashes=False)
-def users_put(city_id):
+def users_put(user_id):
     """ Handles PUT request. Updates a State obj with status 200, else 400 """
     ignore_keys = ['id', 'email',  'created_at', 'updated_at']
     obj = storage.get(User, user_id)
