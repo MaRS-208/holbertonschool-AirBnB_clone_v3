@@ -91,7 +91,7 @@ def places_new(city_id):
 
     storage.new(new_obj)
     storage.save()
-    return jsonify(storage.get(new_obj.__class__, new_obj.id).to_dict())
+    return jsonify(storage.get(new_obj.__class__, new_obj.id).to_dict()), 201
 
 
 # Update
